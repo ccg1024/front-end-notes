@@ -308,3 +308,428 @@ _上述案例就应用里高阶函数与函数的柯里化_。
 
 `create-react-app`创建的项目通常由React, webpack, es6, eslint构成。
 
+### 3月27
+
+在开发过程中，通常第三方的库放在顶端，自己的中间，最后为样式。
+
+#### react ajax
+
+在react中集成**ajax**时有两种方法，通过三方库，或自己封装。（通常都是三方库）
+
+常用的ajax请求的库有：
+
+1. jQuery，比较重，如果需要重新引入，则不建议使用该库
+
+2. axios，轻量级，通常是react应用的选择。
+
+   - 封装`XmlHttpRequest`对象的ajax
+   - `Promise`风格
+   - 可以用在浏览器端和`node`服务器端
+
+前后端分离的时候使用`ajax`进行请求就会面对跨域问题。通常的解决方式为通过`webpack`设置代理进行转发。（通常跨域问题是`ajax`引擎进行了拦截，跨域请求是可以发送的，但是不能接收）
+
+* * * *
+
+###### 第一种方式
+
+**package.json**文件中
+
+```json
+{
+  "proxy": "http://server.address:port"
+}
+```
+
+> 随后，在`axios`请求中，把域名修改成前端服务器的域名。同时，代理并不会把所有资源都转发，只会把在前端域名上找不到的时候，才向后端服务器请求。
+
+* * * *
+
+###### 第二种方式
+
+但是，当需要请求多个服务器信息时，第一种方法就无法实现，因为只能写入一个转发服务器。React脚手架提供第二种方式进行代理设置。通过文件`src/setupProxy.js`进行设置，且不能用ES6语法，得用CJS语法。
+
+```javascript
+const proxy = require('http-proxy-middleware')
+
+module.exports = function(app) {
+  app.use(
+    proxy('/api1', {
+      target: 'http://server.address1:port',
+      changeOrigin: true,
+      pathRewrite: {'^/api1': ''}
+    })，
+    proxy('/api2', {
+      target: 'http://server.address2:port',
+      changeOrigin: true,
+      pathRewrite: {'^/api2': ''}
+    })
+  )
+}
+// get server data
+// axios.get('http://localhost:3000/api1/somedata')
+// get local data
+// axios.get('http://localhost:300/somdata')
+```
+上面的代码中通过第三方插件来实现代理——实际上第一中方式也是使用这个插件进行代理。文件描述为当请求路径中出现`/api1`时，使用代理将请求向目标转发。但需要在转发时将`/api1`进行删除，因为服务器请求也没有这个文件，除非服务器有就不需要。`changeOrigin`是控制服务器收到的请求头中Host字段的值。默认为不开启，Host字段依旧为前端拉起的域名。开启则会修改成服务器域名。
+
+> 第二种方法能够代理多个服务器，且能手动控制是否走代理
+
+#### 消息订阅与发布机制
+
+主流的工具为`PubSubJS`。用于组件之间是信息交互。才用原生的React进行编码时，组件之间通信只能通过`props`, `state`及相关回调函数进行，同时兄弟组件之间没法直接通信，需要借助父组件。
+
+`PubSubJS`则是类似Electron的IPC机制，在某个通道上进行消息的订阅与发布。
+
+* * * *
+
+#### fetch发送请求
+
+通常JQuery, Axios都是对ajax——XHR(XMLHttpRequest)对象的封装，属于三方库。但`Windows`内置一个`fetch`方法，也是`Promise`风格，能够进行服务器请求。
+
+特点：
+
+- 原生函数，不再使用XmlHttpRequest对象提交ajax请求
+
+- 老版浏览器可能不支持
+
+* * * *
+
+#### SPA
+
+通过React等框架编写的应用通常都是SPA(single page application)应用。即点击链接不会进行页面刷新，只会进行局部的组件更新。数据通过ajax获取，在前端通过异步展现。
+
+* * * *
+
+#### React路由
+
+前端路由的原理就是在后台有个程序在检测URL的变化，同时进行匹配，以展示对应的组件。
+
+前端路由的本质就是一个键值对的映射关系，通常为`{key: value}`，即`{path: component}`，一般情况下，`path`是根目录之后的内容，前面的`http`这些东西都是忽略的。
+
+前端路由内部是通过浏览器的`history`来实现支持的。——该对象实际上到H5才推出了操作该对象的API。
+
+> React路由有三个实现的库，在Web应用上采用的是`react-router-dom`
+
+通常情况下，通过路由控制的组件一般放在`pages`文件夹中，而不是放在`components`文件夹中。
+
+但最重要的区别是，一般组件默认是没有`props`传入的。但路由组件中会默认收到路由器传递的三个默认`props`值。（理论上就只有三个默认的）
+
+> 路由匹配过程中默认为模糊匹配，就是路由中的路径必须全部在给出的链接中，至于链接后面是否有多余的内容，则无关紧要。例如下面就是模糊匹配成功。
+
+```javascriptreact
+<Link to="/home/a/b">HOME</Link>
+
+<Route path="/home" component={demo} />
+```
+
+路由匹配总是从最先注册的路由开始，因此在多级路由的时候，下面的路由一定要带上父路由。即`/home`下面的子路由中需要带上`/home`，即`/home/subRoute`形式。
+
+向路由组件传递参数，通过在注册路由时声明传递的参数，在跳转链接中添加参数，就能够将参数传递到路由组件默认的三个`props`之中。通常在`props.match.params`。
+
+```javascript
+// 传递param参数
+<Link to={`/detail/${obj.id}/${obj.name}`}>Detail</Link>
+
+<Route path="/detail/:id/:title" component={Detail}/>
+```
+
+* * * *
+
+第二中传递参数的方式，`search`参数。这种方法无需在注册时声明。数据存在`props.location.search`中。但得到的是`urlencoded`字符串——键值对之间通过`&`进行分隔，就像GET请求一样。
+
+```javascriptreact
+// 传递search参数
+<Link to={`/detail/?id=${obj.id}&?title=${obj.name}`}>Detail</Link>
+
+<Route path="/detail" component={Detail}/>
+```
+
+* * * *
+
+第三种方法，传递`state`参数，这个方法与前面的不同，传递的内容在地址栏是不显示的。同样路由注册无需声明。
+
+```javascriptreact
+// 传递state参数
+<Link to={{pathname:'/detail', state:{id:xx,title:xx}}}>Detail</Link>
+```
+数据通常存储在`props.location.state`中，且为一个对象，能够直接使用解构赋值。
+
+> 使用第三种方式传递时需要考虑浏览器历史记清空问题，因为路由是通过`history`维护，虽然使用`state`传递参数时地址栏没有信息，但后台有维护，若清空历史记录，则后台数据丢失。代码就会取不到值，因此编码的时候要考虑这一点。设置一些默认值。
+
+> 注意，这里的`state`不是组件里的属性`state`。
+
+* * * *
+
+默认的路由模式都是`push`模式，每条链接都会留下痕迹。在`Link`标签中介入`replace`，同开启严格模式。
+
+* * * *
+
+**自动跳转**：由于React路由是通过`history`对象维护的，因此路由组件携带了一些该对象的API，可以通过这些API实现自动链接跳转(`history.push()`, `history.replace()`)
+
+> push方法会留下痕迹，可以回退，replace方法不会留下痕迹。
+
+* * * *
+
+为了让一般组件使用路由组件的`props`，可以通过`withRouter`函数实现（这不是个组件）。在导出普通组件的时候通过该函数加工。
+
+```javascriptreact
+export default withRouter(NormalComponent)
+```
+
+* * * *
+
+**BrowserRouter**与**HashRouter**区别
+
+1. 底层原理不同：BrowserRouter使用的是H5的history API，不兼容IE9及以下版本。HashRouter使用的是URL的哈希值。
+
+2. path表现形式不一样：BrowserRouter的路径中没有#，HashRouter中包含#号。
+
+3. 刷新后对state的影响：BrowserRouter没有影响，**HashRouter**刷新后会导致路由state参数丢失。
+
+4. **HashRouter**可以用于解决一些路径错误相关的问题。
+
+### redux
+
+1. redux是一个专门用于做**状态管理**的JS库。
+
+2. 可以用在react, angular, vue等项目中，但基本与react配合使用
+
+3. 作用：集中管理react应用中多个组件**共享**的状态
+
+在多个组件中需要共享某些状态时，相对于每个组件进行订阅发布就有些麻烦，这时候通过redux来管理这些共享变量就方便许多。
+
+![redux-abs](./img/redux_abs.png)
+
+使用redux的两种情况
+
+1. 某个组件的状态需要然其他组件随时拿到（共享）
+
+2. 一个组件需要改变另一个组件的状态（通信）
+
+3. 总体原则：能不用就不用
+
+**工作原理图**
+
+![redux](./img/redux.png)
+
+`action`在图中表现为对象形式，实际上，分两种类型。
+
+1. `action`类型为`Objext`，则为同步`action`
+
+2. `action`类型为`Function`，则为异步`action`
+
+* * * *
+
+然而，由于大量的React应用都使用的Redux库，因次，React团队就推出了React的插件`react-redux`，能够更好的在React应用中使用Redux。模型图如下
+
+![react-redux](./img/react-redux.png)
+
+* * * *
+
+###### 纯函数
+
+一些纯函数的约束
+
+1. 不得改写参数
+
+2. 不会产生任何副作用，例如网络请求，输入输出设备等
+
+3. 不能调用`Date.now()`或者`Math.random()`等不纯的方法
+
+> 在React18中，基本常见的hook都是设计成传入的函数为纯函数
+
+* * * *
+
+### Context
+
+通常用于祖孙组件之间的通信。不过前面已经有两消息订阅与发布，redux。这中方法应该用的少。（能够在函数与类组件之间进行数据传递，只不过函数的接收要麻烦一点）
+
+> 开发中一般不用，都是用来封装react插件。
+
+* * * *
+
+### Component
+
+该继承的组件是存在两个问题的。
+
+1. 只要执行了`setState()`函数，即便啥也没变，也会重新渲染
+
+2. 当前组件重新渲染了，就会自动渲染子组件····效率低
+
+> 该情况同样适用与函数式组件，但是，函数式组件在检测到后续的状态都没有改变时就不会重新渲染，但首次介入没有修改状态的设置状态函数时依旧会调用自己的渲染，但不会渲染子组件。而每次改变状态，子组件都会重新渲染
+
+**原因**：`Component`中的`shouldComponentUpdate()`总是返回`true`，这就导致永远会重新渲染。
+
+* * * *
+
+###### 方法一
+
+如果是类组件，则可以重写`shouldComponentUpdate`方法，手动判断是否需要更新。但这样的方法面对状态变量多时就不好用，且实际开发中少有改写该方法的。
+
+* * * *
+
+###### 方法二
+
+如果是类组件，可以使用`PureComponent`来代替`Component`。函数式组件则可以使用`React.memo()`，在导出组件的时候用该方法包裹组件，会记录包裹的组件收到的`props`是否发生改变，没有改变就不会重新渲染。
+
+* * * *
+
+### renderProps
+
+当组件之间的父子关系是通过标签体形式存在时，无法直接向子组件传递属性，需要通过组件上的属性进行回调。
+
+> 注意，A组件的属性`render`是可以任意命名的，之后声明与调用的名字一样就可以。
+
+```javascriptreact
+class App extends Component {
+  render() {
+    return (
+      <div>
+        <A render={(name)=><B name={name}>} />
+      </div>
+    )
+  }
+}
+
+class A extends Components {
+  state = {name: 'tom'}
+  render() {
+    return (
+      <h1>A component</h1>
+      {this.prorps.render(name)}
+    )
+  }
+}
+
+{/* show tom in B component */}
+class B extends Components {
+  render() {
+    return (
+      <div>{this.props.name}</div>
+    )
+  }
+}
+```
+
+* * * *
+
+### ErrorBoundary
+
+错误边界：由于前后端的分离，那么就会出现后端数据与前端写的数据结构不对等的问题，当出现这种情况的时候， 需要能够正确的展示未出错的组件，同时在出错组件上展示一段提示。同时能够将错误控制在对应的组件。
+
+通常的做法是在容易出错组件的父组件上设置错误边界。类组件的做法为使用`static getDerivedStateFromError`。该方法是当子组件出现错误时，被调用。
+
+```javascriptreact
+class Parent extends Component {
+  state = {hasError: ''}
+  static getDerivedStateFromError(error) {
+    return {hasError: error}
+  }
+
+  render() {
+    return (
+      <div>
+      {this.state.hasError ? <h2>balabala</h2> : <Child />}
+      </div>
+    )
+  }
+}
+```
+
+同时会配合`componentDidCatch`方法统计错误，将信息发送给服务器后台。
+
+> **注意，只能捕获生命周期中产生的错误**。
+
+* * * *
+
+组件之间的通信方式总结：
+
+1. props
+
+2. 消息订阅与发布：pubs-sub、event等
+
+3. 集中式管理：redux、dva等
+
+4. context
+
+   - 生产者-消费者模式
+  
+**一般采用的搭配方式**：
+
+- 父子组件：props
+
+- 兄弟组件：消息订阅-发布、集中式管理
+
+- 祖孙组件（跨级组件）：消息订阅-发布、集中式管理、_context_(开发用的少)
+
+* * * *
+
+### React-Router 6
+
+当前最新版的路由组件。函数式组件时代的开端。同样的，为了使用react的路由进行导航，那么对应的链接就必须用`react-router-dom`中的组件进行编写，与5版本的相同，分为`Link`与`NavLink`——有高亮与没有高亮。
+
+在6版本中，重定向组件修改成`Navigate`，该组件一渲染就会引起试图切换。
+
+`NavLink`修改高亮现在需要在`className`上添加一个回调函数，用于返回应用在链接上的样式，回调函数接受一个参数，里面描述该链接是否是被点击的。
+
+```javascript
+<NavLink className={({isActive})=>isActive? '' : 'active'} to="/home">Home</NavLink>
+```
+
+* * * *
+
+#### 路由表
+
+6版本新增的Hook——`useRoutes`。能够将`Route`所注册的路由集中管理。
+
+```javascriptreact
+<Routes>
+  <Route path="/home" element={<Home />} />
+  <Route path="/about" element={<Aboud />} />
+</Routes>
+
+{/*collect with useRoutes*/}
+const element =  useRoutes([
+  {
+    path: '/home',
+    element: <Home/>，
+    children:[
+      {
+        path:"/detail"
+        element:<Detail/>
+      }
+    ]
+  },
+  {
+    path: '/about',
+    element: <About/>
+  }
+])
+```
+
+通过路由表收集后，上面的注册路由就不需要写了。只要把`{element}`放到相应的位置就可以。同时，子集路由无需带上父级路由前缀。而子级路由匹配中后，显示的位置需要使用`Outlet`组件进行标记——即`<Outlet />`放在哪里，子级路由显示在哪里。但得在同一组件中。
+
+* * * *
+
+#### 接受参数
+
+路由5中，都是写的类组件，传递的参数都是在`props`中，升级到6后，大多为函数组件，传递参数就需要使用额外的Hook。
+
+- `useParams`：返回接受到的param形式的参数
+
+- `useSearchParams`：返回接受到的search形式参数，返回形式类似`useState`，对第一个返回变量调用`get(key)`获取对应的value值。
+
+- `useLocation`：返回`location`对象，里面有`state`。
+
+  > 6版中，state方法要参数传递要简便一点。查看官网Link内容
+
+* * * *
+
+在5版本的编程式路由导航中，可以通过`history`属性进行页面跳转，6版本中函数组件没有该属性，通过`useNavigate`Hook进行实现。该方法返回的对象能实现类似`histroy`的功能。但功能没那么全。
+
+```javascriptreact
+const nav = useNavigate()
+
+nav('/home') //go to home page
+nav('/home', {})//go home with some config
+```
