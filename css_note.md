@@ -113,3 +113,45 @@ mobile first vs desktop first，只是在写css的阶段。
 5. flex-basis：对应子元素在主轴上的大小。(默认值为auto)
 
 > flex是一维的，grid是二维的。 flex是flex-grow flex-shrink flex-basis缩写
+
+### CSS3新特性
+
+css（cascading style sheets）层叠样式表，一种标记语言。css3是向后兼容的，即以前的语法也可以使用。
+
+新增了一些**选择器**，例如属性选择器中使用部分的正则——以那些字母开头。新增了一些样式。例如圆角边框，阴影，背景属性（背景大小），颜色（rgba，hala）。
+
+**transition过渡**
+
+```css
+transition： CSS属性，花费时间，效果曲线(默认ease)，延迟时间(默认0)
+/* or */
+transition-property: width; 
+transition-duration: 1s;
+transition-timing-function: linear;
+transition-delay: 2s;
+```
+
+**transform转换**
+
+- transform: translate(12px, 12px) 位移
+
+- transform：scale(2, 0.5) 缩放
+
+- transform：rotate(0.5turn) 旋转
+
+- transform：skew(30deg, 20deg) 倾斜
+
+**animation动画**
+
+结果可能跟transition差不多，但animation好像有GPU加速。
+
+- animation-name：动画名称
+- animation-duration：动画持续时间
+- animation-timing-function：动画时间函数
+- animation-delay：动画延迟时间
+- animation-iteration-count：动画执行次数，可以设置为一个整数，也可以设置为infinite，意思是无限循环
+- animation-direction：动画执行方向
+- animation-paly-state：动画播放状态
+- animation-fill-mode：动画填充模式
+
+**颜色渐变**，**flex**等。

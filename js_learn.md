@@ -361,7 +361,7 @@ Person.prototype.commonMethod = function() => {
 }
 ```
 
-> 注意大写的Prototype与小写的prototype是不一样的，小写的是可以显示的原型对象，大写的应该是与类相关的原型继承。
+> 注意大写的Prototype与小写的prototype是不一样的，小写的是可以显示的原型对象，大写实际上是__proto__对象原型在浏览器中的显示。
 
 **constructor**
 
