@@ -1,6 +1,6 @@
 ### Window
 
-> window端记录，接linux端。
+> window 端记录，接 linux 端。
 
 ### 正则表达式后续
 
@@ -17,11 +17,11 @@
 
 - 边界符：开头与结尾必须是什么字符
 - 量词：重复的次数
-- 字符类（'\d',表示0-9）
+- 字符类（'\d',表示 0-9）
 
 **量词**
 
-除了.,*,?,+。还有下面的几个更常用的。
+除了.,\*,?,+。还有下面的几个更常用的。
 
 - {n}: repeat n times
 - {n,}: repeat n or more times
@@ -31,19 +31,19 @@
 
 **字符类**
 
-| 预定类 | 说明 |
-| --- | --- |
-| \d | like [0-9] |
-| \D | like [^0-9] |
-| \w | like [A-Za-z0-9_] |
-| \W | like [^A-Za-z0-9_] |
-| \s | match any space(space, tab...etc) |
-| \S | match any not space char |
+| 预定类 | 说明                              |
+| ------ | --------------------------------- |
+| \d     | like [0-9]                        |
+| \D     | like [^0-9]                       |
+| \w     | like [A-Za-z0-9_]                 |
+| \W     | like [^A-Za-z0-9_]                |
+| \s     | match any space(space, tab...etc) |
+| \S     | match any not space char          |
 
 #### 修饰符
 
 - i: ignore, 忽略大小写
-- g: global, 全局匹配(类似vim中的替换操作的g)
+- g: global, 全局匹配(类似 vim 中的替换操作的 g)
 
 #### 通过正则替换
 
@@ -71,7 +71,7 @@ toUpperCase('_name_yxj_com_')
 
 登录成功后，用户名等数据存储在`localStorage`中。
 
-* * * *
+---
 
 ### Iterators and generators
 
@@ -79,7 +79,7 @@ toUpperCase('_name_yxj_com_')
 
 #### 循环相关
 
-处理熟知的循环方式，JS还提供标签语法来特别标识一个循环，通过标签来引用或配合break，continue来控制循环。
+处理熟知的循环方式，JS 还提供标签语法来特别标识一个循环，通过标签来引用或配合 break，continue 来控制循环。
 
 ```js
 // label statement
@@ -97,17 +97,17 @@ markLoop: while (theCondition) {
 
 #### for-in
 
-for-in循环会迭代对象中的所有**可枚举**属性。但最好别用来循环数组，因为除了返回数组下标，还会返回用户自定义的属性——因为数组也是对象，只要是对象，就可以手动添加属性。
+for-in 循环会迭代对象中的所有**可枚举**属性。但最好别用来循环数组，因为除了返回数组下标，还会返回用户自定义的属性——因为数组也是对象，只要是对象，就可以手动添加属性。
 
 > 数组就是特殊的对象，系统自定义了下标属性，只需添加值。
 
 #### for-of
 
-for-of循环会创建一个循环来迭代**可迭代**对象。循环迭代的是**值**。而不是**属性**。但for-of迭代数组时，只会返回数组的值，用户自定义的属性值不会返回。
+for-of 循环会创建一个循环来迭代**可迭代**对象。循环迭代的是**值**。而不是**属性**。但 for-of 迭代数组时，只会返回数组的值，用户自定义的属性值不会返回。
 
-> 注意，是**可迭代对象**的值，一般自定义的Object不是可迭代对象，是不能够使用该循环的，但for-in就可以。这两者有明显区别。
+> 注意，是**可迭代对象**的值，一般自定义的 Object 不是可迭代对象，是不能够使用该循环的，但 for-in 就可以。这两者有明显区别。
 
-* * * *
+---
 
 上面两个循环都可以配合解构赋值与`Object.entries()`来同时遍历对象的键值对。
 
@@ -120,6 +120,7 @@ for (const [key, val] of Object.entries(obj)) {
 // "foo" 1
 // "bar" 2
 ```
+
 当`for-of`循环迭代一个可迭代对象过程。
 
 1. 首先会调用对象的`[@@iterator]()`方法，该方法会返回一个迭代器（iterator）。
@@ -212,11 +213,11 @@ function* makeRangeIterator(start = 0, end = Infinity, step = 1) {
 
 显然，使用生成器函数就可以避免编写大量的维护代码。
 
-* * * *
+---
 
 **可迭代对象（Iterable）**
 
-上述说的迭代器，生成器。最终是为了这里服务，**当对象定义了迭代行为**就可以认为对象可迭代。通常Object类型不是可迭代的。
+上述说的迭代器，生成器。最终是为了这里服务，**当对象定义了迭代行为**就可以认为对象可迭代。通常 Object 类型不是可迭代的。
 
 为了实现可迭代，对象中或者原型链中必须实现`@@iterator`方法。也就是必须函数一个属性名`Symbol.iterator`。
 
@@ -253,6 +254,7 @@ const myIterable = {
   },
 };
 ```
+
 ### 用于可迭代对象的语法
 
 - `for-of`
@@ -275,7 +277,7 @@ function* fun2() {
 fun2().next() // {value: 42, done: true}
 ```
 
-* * * *
+---
 
 **生成器优势**
 
@@ -305,13 +307,13 @@ it.next(true) // 0
 it.next() // 1
 ```
 
-* * * *
+---
 
 ### Event Loop
 
-事件循环是让JS实现异步的一种方式——本身是线程编程语言。通过事件循环来执行、收集和处理事件以及执行队列中的子任务。
+事件循环是让 JS 实现异步的一种方式——本身是线程编程语言。通过事件循环来执行、收集和处理事件以及执行队列中的子任务。
 
-一个JS运行时包含一个**待处理消息**的消息队列，每个消息都关联一个处理该消息的回调函数。在事件循环期间，消息队列中的消息会被作为与之关联的回调函数的参数传递过去。
+一个 JS 运行时包含一个**待处理消息**的消息队列，每个消息都关联一个处理该消息的回调函数。在事件循环期间，消息队列中的消息会被作为与之关联的回调函数的参数传递过去。
 
 当函数栈中的调用全部处理完全时，才会从消息队列中取出下一个消息进行处理。**这样的好处是，处理函数在运行时不会被抢占资源，但当一个消息的处理函数耗时太长时，浏览器将无法与用户进行其他互动，此时最好将一个消息分成多个**。
 
@@ -348,3 +350,83 @@ it.next() // 1
 - 字符类型或`Symbol`类型
 
 - 自有属性或继承属性
+
+### 算法
+
+#### 排序
+
+**冒泡排序**
+
+```js
+function bubbleSort(arr) {
+  for (let i = 0; i < arr.length; i++) {
+    for (let j = 0; j < arr.length - 1 - i; j++) {
+      if (arr[j] > arr[j+1]) {
+        let temp = arr[j+1]
+        arr[j+1] = arr[j]
+        arr[j] = temp
+      }
+    }
+  }
+}
+```
+
+**选择排序**
+
+```js
+function selectionSort(arr) {
+  let len = arr.length
+  for (let i = 0; i < len; i++) {
+    let markIndex = i
+    for (let j = i + 1; j < len; j++) {
+      if (arr[j] < arr[markIndex]) {
+        markIndex = j
+      }
+    }
+    let temp = arr[markIndex]
+    arr[markIndex] = arr[i]
+    arr[i] = temp
+  }
+}
+```
+
+**插入排序**
+
+```js
+function insertSort(arr) {
+  let len = arr.length
+  for (let i = 1; i < len; i++) {
+    for (let j = i; j > 0; j--) {
+      if (arr[j] < arr[j-1]) {
+        let temp = arr[j]
+        arr[j] = arr[j-1]
+        arr[j-1] = temp
+      }
+    }
+  }
+}
+```
+
+**快速排序**
+
+```js
+function quickSort(arr, low, high) {
+  if (low < high) {
+    let p = partition(arr, low, high)
+    quickSort(arr, low, p - 1)
+    quickSort(arr, p + 1, high)
+  }
+}
+
+function partition(arr, low, high) {
+  let p = arr[low]
+  while (low < high) {
+    while (low < high && arr[high] > p) --high
+    arr[low] = arr[high]
+    while (low < high && arr[low] < p) ++low
+    arr[high] = arr[low]
+  }
+  arr[low] = p
+  return low
+}
+```
