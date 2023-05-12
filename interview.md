@@ -61,3 +61,21 @@ Fiber 将更新划分成工作单元，通过`requestAnimationFrame`来处理优
 ##### 提交阶段
 
 该阶段是用户可见的渲染阶段，因此是同步渲染，无法无法拆分成部分渲染。该阶段 Fiber 已经有 UI 上渲染的 current 树，finishedWork，在渲染阶段建立的 workInProgress 树，效果列表。效果列表（effect list）是 workInProgree 树的子集，通过 nextEffect 指针进行链接，实际的 DOM 更新是发生在效果列表上的。该阶段 workInProgree 树将成为新的 current 树。
+
+# 阅文
+
+cookie 大小，4k，如果设置超过 4k 的内容，就会被裁剪。
+
+在一个页面中通过`windows.open`方法打开新页面，新页面中会存在旧页面中`sessionStorage`设置的内容，但是两个页面中的`sessionStorage`是不共享的。
+
+`localStorage`跨域问题。**只要不同源就不共享数据**。
+
+React 中 Fiber 原理。渲染过程中使用到的**两个函数**
+
+事件循环，宏任务与微任务。
+
+react 中与 vue 的双向绑定
+
+跨域问题：`webpack`的代理只能够是本地的，无法应用在服务器上。
+
+跨域解决方案：jsonp，cors，nginx 代理，nodejs 中间件，`document.domain+iframe`，`location.hash+iframe`，`window.name+ifrmae`，`postMessage`，`webSocket`。
