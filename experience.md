@@ -201,6 +201,164 @@ px，rem，em，vw，vh。注意的是，em 用在其他属性上，是相对于
 
 ---
 
+- 说一说 JS 继承的方法和优点
+
+> 原型链继承、构造函数继承、组合继承、原型式继承、寄生式继承、寄生组合式继承、ES6 Class 标准
+
+**原型链继承**
+
+优点：写法方便简洁，容易理解。
+
+缺点：在父类型构造函数中定义的引用类型值的实例属性，会在子类型原型上变成原型属性被所有子类型实例所共享。同时在创建子类型的实例时，不能向超类型的构造函数中传递参数。
+
+> 原型与原型对象是同一个东西
+
+```js
+function Father() {
+  this.fatherObj = {pro: 'haha'}
+  this.fatherStr = "father"
+}
+function Son() {
+  this.sonProps = 'son'
+}
+Son.prototype = new Father()
+
+const son = new Son()
+```
+
+**构造函数继承**
+
+在子类型构造函数内部调用父类型的构造函数，通过 apply()或者 call()方法将父对象的构造函数绑定到子对象上。
+
+优点：解决原型链继承不能传递参数问题和父类的原型共享问题。
+
+缺点：借用构造函数的缺点是方法都在构造函数中定义，无法实现函数的复用。**在父类型的原型中定义的方法，对子类型而言也是不可见的**，结果所有类型都只能使用构造函数模式。
+
+```js
+function Father(name) {
+  this.name = name
+}
+Father.prototype.fatherMethod = () => {
+  console.log('father method')
+}
+function Son(name) {
+  Father.call(this, name)
+  this.subName = 'son'
+  this.sunMethod = () => {
+    console.log('son')
+  }
+}
+const son = new Son('father name')
+```
+
+> 子类中是找不到`fatherMethod`方法的。
+
+**组合继承**
+
+将原型链继承与借用构造函数继承组合到一块，**使用原型链实现对原型属性与方法的继承，通过构造函数实现对实例属性的继承**。即实现了函数复用，有保证每个实例都有自己的属性。
+
+优点：解决了原型链继承与借用构造函数继承造成的影响。
+
+缺点：无论什么时候，都需要调用两次父类型构造函数；第一次在创建子类型原型的时候，第二次在子类型内部调用构造函数的时候。
+
+```js
+function Father(name) {
+  this.fatherName = name
+  this.fatherStr = "father"
+}
+Father.prototype.fatherMethod = () => console.log('father')
+
+function Son(name) {
+  Father.call(this, name)
+  this.sonName = 'son name'
+}
+Son.prototype = new Father()
+Son.prototype.sonMethod = () => console.log('son')
+
+const son = new Son('hhh')
+```
+
+**原型式继承**
+
+在一个函数 A 内部创建一个**临时性构造函数**，然后将传入的对象作为这个构造函数的原型，最后返回这个临时类型的一个新实例。本质上，函数 A 是对传入的对象执行了一次浅复制。ES5 通过`Object.create`方法将原型式继承的概念规范化。该方法传入两个参数，作为新对象原型的对象，以及给新对象定义额外属性的对象（可选）。只有一个参数时，效果与函数 A 相同。
+
+优点：不需要单独创建构造函数
+
+缺点：属性中包含的引用值始终会在**相关对象间共享**。
+
+```js
+function A(o) {
+  function temp() {}
+  temp.prototype = o
+  return new temp()
+}
+
+const Father = {
+  fatherName: 'father'
+  shareObj = ['1', '2']
+}
+
+const son = A(Father)
+```
+
+**寄生式继承**
+
+寄生式继承背后的思路类似于寄生构造函数和工厂模式：创建一个实现继承的函数，以某种方式增强对象，然后返回这个对象。
+
+优点：写法简单，不需要单独创建构造函数。
+
+缺点：通过寄生式继承给对象添加函数会导致函数难以复用。
+
+> 在原型式继承的基础上增强浅复制的能力。只是一种思路
+
+```js
+function anotherA(o) {
+  let clone = A(o)
+  clone.sayHi = function () {
+    // 增强浅复制能力
+    console.log('hi')
+  }
+  return clone
+}
+let father = {
+  name: 'father'
+  share: ['1', '2']
+}
+let son = anotherA(father)
+son.sayHi()
+```
+
+**寄生组合式继承**
+
+通过借用构造函数来继承属性，通过原型链的混成形式来继承方法。本质上，就是使用寄生式继承来继承父类型的原型，然后再将结果指定给子类型的原型。
+
+优点：高效率，只调用一次父构造函数，避免在子原型上创建多于属性。原型链还能保持不变。
+
+缺点：代码复杂。
+
+```js
+function inheritPrototype(son, father) {
+  const proto = A(father.prototype)
+  proto.constructor = son
+  son.prototype = proto
+}
+function Father(name) {
+  this.fatherName = name
+}
+Father.prototype.fatherM = () => console.log('f')
+function Son(name) {
+  Father.call(this, name)
+  this.sonName = 'son'
+}
+inheritPrototype(Son, Father)
+
+const son = new Son('hhh')
+```
+
+**ES6 Class 实现继承**
+
+---
+
 ### 浏览器
 
 - 浏览器的垃圾回收机制
@@ -328,6 +486,39 @@ XSS 通常分为反射型与存储型。反射型是临时通过 url 访问网�
 防御富文本：较为复杂，通过白名单方式过滤允许的 HTML 标签与属性进行防御。
 
 开启浏览器 XSS 防御，禁止 JS 读取某些敏感 cookie。
+
+---
+
+- 说一说 defer 和 async 区别。
+
+> 加载 JS 文档和渲染文档可以同时进行、JS 代码立即执行、JS 代码不立即执行、渲染引擎和 JS 引擎互斥
+
+浏览器会立即加载 JS 文件并执行指定的脚本，“立即”指的是在渲染该`script`标签之下的文档元素之前，也就是说不等待后续载入的文档元素，读到就加载并执行。
+
+加上`async`属性，加载 JS 文档和渲染文档可以同时进行（异步加载）。当JS加载完成，JS代码立即执行，会阻塞HTML渲染。
+
+加上`defer`，同样的，加载后续文档元素过程与JS加载过程并行（异步），**当HTML渲染完成后，才会执行JS代码**。
+
+**扩展**
+
+渲染阻塞的原因：由于JS是可操作DOM的，如果在修改这些元素属性同时渲染界面（JS线程与UI线程同时运行），那么渲染线程前后获得的元素数据就可能不一致。因此，为了防止渲染出现不可预期的结果，浏览器设置GUI渲染线程与JS引擎为互斥关系。
+
+当浏览器执行JS程序时，GUI渲染线程会被保存在一个队列中，直到JS程序执行完成，才会接着执行。如果JS执行时间过长，这样就会造成页面的渲染不连贯，导致页面渲染加载阻塞的感觉。
+
+---
+
+- 浏览器如何渲染页面
+
+> dom树，stylesheet，布局树，分层，光栅化，合成
+
+浏览器拿到HTML，先将HTML转化成dom树，再将CSS样式转换成stylesheet，创建布局树(依据dom树结构，使用css样式生成的树形数据)，对布局树进行分层，为每个图层生成绘制列表，再将图层分成图块，紧接着光栅化，将图块转化成位图，最后合成绘制生成页面。
+
+**扩展**
+
+分层的目的：避免整个页面渲染，把页面分成多个图层，尤其是动画的时候，把动画独立出一个图层，渲染时只渲染该图层（transform, z-index等）。浏览器会自动优化生成图层。
+
+光栅化目的：页面如果很长，但可视区域很小，避免渲染非可视区域的样式造成资源浪费，所以将每个图层有划分成多个小格子，当前只渲染可视区域附近的内容。
+
 
 ### 代码
 
