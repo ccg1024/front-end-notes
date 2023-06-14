@@ -1,7 +1,7 @@
 ---
 title: 面经总结
 desc: 牛客面试经验
-date: 2023-04-11
+date: 2023-4-11
 ---
 # 面经
 
@@ -294,8 +294,8 @@ function A(o) {
 }
 
 const Father = {
-  fatherName: 'father'
-  shareObj = ['1', '2']
+  fatherName: 'father',
+  shareObj: ['1', '2']
 }
 
 const son = A(Father)
